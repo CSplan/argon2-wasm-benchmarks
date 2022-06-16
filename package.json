@@ -2,9 +2,24 @@
   "name": "argon2-wasm-benchmarks",
   "version": "0.1.0",
   "description": "Performance data for @very-amused/argon2-wasm. Used in CSplan to help calculate optimal hash parameters.",
+  "type": "module",
   "main": "index.js",
   "repository": "git@github.com:CSplan/argon2-wasm-benchmarks.git",
   "author": "very-amused <very-amused@pm.me>",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "scripts": {
+    "bench": "yarn bench:memory",
+    "bench:memory": "ts-node --esm src/memory.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.28.0",
+    "@typescript-eslint/parser": "^5.28.0",
+    "eslint": "^8.17.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-unicorn": "^42.0.0",
+    "ts-node": "^10.8.1",
+    "typescript": "^4.7.3"
+  }
 }
