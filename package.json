@@ -1,0 +1,10 @@
+{
+  "name": "argon2-wasm-benchmarks",
+  "version": "0.1.0",
+  "description": "Performance data for @very-amused/argon2-wasm. Used in CSplan to help calculate optimal hash parameters.",
+  "main": "index.js",
+  "repository": "git@github.com:CSplan/argon2-wasm-benchmarks.git",
+  "author": "very-amused <very-amused@pm.me>",
+  "license": "MIT",
+  "private": true
+}
