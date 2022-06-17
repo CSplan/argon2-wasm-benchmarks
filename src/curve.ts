@@ -5,7 +5,7 @@ export class BenchmarkCurve {
   private stream: WriteStream
 
   constructor(file: `${string}.csv`) {
-    this.stream = createWriteStream(file, { flags: 'a' })
+    this.stream = createWriteStream(file, { flags: 'w' })
   }
 
   push(time: number, value: number): void {
