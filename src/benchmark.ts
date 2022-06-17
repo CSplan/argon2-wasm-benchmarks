@@ -18,6 +18,9 @@ export enum BenchmarkTypes {
 }
 
 export type Benchmark = {
+  /** The display name of the benchmark */
+  name: string
+
   type: BenchmarkTypes
   // Constants (used as minimum value for the field being benchmarked)
   time?: number // Default 1
