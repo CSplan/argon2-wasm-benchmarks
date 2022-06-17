@@ -11,29 +11,40 @@ const wasm = {
   argon2Simd: readFileSync(`${wasmBasePath}/argon2-simd.wasm`)
 }
 
-enum BenchmarkTypes {
+export enum BenchmarkTypes {
   Memory,
   Time,
   Parallelism
 }
 
-type Benchmark = {
+export type Benchmark = {
   type: BenchmarkTypes
   // Constants (used as minimum value for the field being benchmarked)
-  time: number
-  parallelism: number
-  memory: number // in KiB
-  simd: boolean
-  password: string
+  time?: number // Default 1
+  parallelism?: number // Default 1
+  memory?: number // in KiB, Default 128MB
+  simd?: boolean // Default false
 
   // Max value of the field being benchmarked
   max: number
 
   // The resolution of the generated curve, equal to the number of tests to be run - 1
-  segments: number
+  segments?: number // Default 10
 }
 
-async function runBenchmark(b: Benchmark): Promise<void> {
+function assignDefaults(b: Benchmark): Required<Benchmark> {
+  b.time = b.time ?? 1
+  b.parallelism = b.parallelism ?? 1
+  b.memory = b.memory ?? 1024 * 128
+  b.simd = b.simd ?? false
+  b.segments = b.segments ?? 10
+  return b as Required<Benchmark>
+}
+
+export async function runBenchmark(benchmark: Benchmark): Promise<void> {
+  // Assign default values
+  const b: Required<Benchmark> = assignDefaults(benchmark)
+
   // Initialize the curve output
   let
     dir: string,
@@ -69,7 +80,7 @@ async function runBenchmark(b: Benchmark): Promise<void> {
   
   const curve = new BenchmarkCurve(`${dir}/${file}.csv`, variableHeader)
 
-  // Generate a random salt
+  // Generate a random salt and password
   const salt = crypto.getRandomValues(new Uint8Array(16))
 
   const increment = Math.floor((b.max - min) / b.segments)
@@ -80,7 +91,7 @@ async function runBenchmark(b: Benchmark): Promise<void> {
 
     // Prepare parameters
     const params: Parameters<Argon2['hashPassword']>[0] = {
-      password: b.password,
+      password: randomPassword(20), 
       salt,
       timeCost: b.time,
       memoryCost: b.memory,
@@ -131,15 +142,28 @@ function benchmarkMessage(v: number, type: BenchmarkTypes): string {
   }
 }
 
-await runBenchmark({
-  type: BenchmarkTypes.Memory,
-  time: 3,
-  memory: 1024,
-  parallelism: 8,
-  simd: true,
-  password: 'samplepassword',
+function randomPassword(len: number): string {
+  // Populate an array of [a-zA-Z0-9]
+  const chars: string[] = Array(62)
+  {
+    const upperStart = 'A'.charCodeAt(0)
+    const lowerStart = 'a'.charCodeAt(0)
+    // Populate letters
+    for (let i = 0; i < 26; i++) {
+      chars[i] = String.fromCodePoint(upperStart + i)
+      chars[i+26] = String.fromCodePoint(lowerStart + i)
+    }
+    // Populate numbers
+    for (let i = 0; i < 10; i++) {
+      chars[i+52] = i.toString()
+    }
+  }
 
-  max: 1024 * 1024,
-
-  segments: 20
-})
+  // Generate a random password
+  let password = ''
+  const rand = crypto.getRandomValues(new Uint8Array(len))
+  for (let i = 0; i < len; i++) {
+    password += chars[Math.floor((rand[i] / 255) * (chars.length - 1))] // Convert random number from 0-255 to 0-(chars.length - 1)
+  }
+  return password
+}
