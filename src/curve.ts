@@ -5,18 +5,18 @@ import { dirname } from 'path'
 export class BenchmarkCurve {
   private stream: WriteStream
 
-  constructor(file: `${string}.csv`, variableHeader: string) {
+  constructor(file: `${string}.csv`, ...headers: string[]) {
     const dir = dirname(file)
     mkdirSync(dir, {
       recursive: true
     })
     this.stream = createWriteStream(file, { flags: 'w' })
     // Add CSV headers
-    this.stream.write(`Login Time (ms), ${variableHeader}\n`)
+    this.stream.write(`${headers.join(', ')}\n`)
   }
 
-  push(time: number, value: number): void {
-    this.stream.write(`${time}, ${value}\n`)
+  push(...data: unknown[]): void {
+    this.stream.write(`${data.join(', ')}\n`)
   }
 
   /** Close the curve's output file. Must be called to save buffered output. */

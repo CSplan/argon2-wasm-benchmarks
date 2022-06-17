@@ -32,7 +32,7 @@ export type Benchmark = {
   max: number
 
   // The resolution of the generated curve, equal to the number of tests to be run - 1
-  segments?: number // Default 10
+  segments?: number // Default 9
 }
 
 function assignDefaults(b: Benchmark): Required<Benchmark> {
@@ -40,7 +40,7 @@ function assignDefaults(b: Benchmark): Required<Benchmark> {
   b.parallelism = b.parallelism ?? 1
   b.memory = b.memory ?? 1024 * 128
   b.simd = b.simd ?? false
-  b.segments = b.segments ?? 10
+  b.segments = b.segments ?? 9
   return b as Required<Benchmark>
 }
 
@@ -81,12 +81,12 @@ export async function runBenchmark(benchmark: Benchmark): Promise<void> {
   }
 
   
-  const curve = new BenchmarkCurve(`${dir}/${file}.csv`, variableHeader)
+  const curve = new BenchmarkCurve(`${dir}/${file}.csv`, 'Login Time (ms)', variableHeader)
 
   // Generate a random salt and password
   const salt = crypto.getRandomValues(new Uint8Array(16))
 
-  const increment = Math.floor((b.max - min) / b.segments)
+  const increment = Math.ceil((b.max - min) / b.segments)
   outer:
   for (let i = 0; i <= b.segments; i++) {
     const v = i === b.segments ? b.max : min + (i * increment)
